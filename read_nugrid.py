@@ -161,3 +161,21 @@ def PopIIIturnToArepoWith11Elements(Table):
     Table['Yields']['Z_0.0']['Yield'] =  NewYileds
     return Table
         
+def writeToHDF5(Table, filename, reference):
+    H5_Table = h5py.File(filename, 'w')
+    H5_Table.create_dataset("Masses", data=Table['Masses'])
+    H5_Table.create_dataset("Metallicities", data=Table['Metallicities'])
+    H5_Table.create_dataset("Number_of_masses", data=int(Table['Masses'].shape[0]))
+    H5_Table.create_dataset("Number_of_metallicities", data=int(Table['Metallicities'].shape[0]))
+    H5_Table.create_dataset("Number_of_species", data=int(Table['Species_names'].shape[0]))
+    H5_Table.create_dataset("Reference", data=np.bytes_(reference))
+    H5_Table.create_dataset("Species_names", data=Table['Species_names'])
+    H5_Table.create_dataset("Yield_names", data=Table['Yield_names'])
+    Yields = H5_Table.create_group("Yields")
+    for names in Table['Yield_names']:
+        names = str(names)[2:-1]
+        YieldTable = Yields.create_group(names)
+        YieldTable['Ejected_Mass'] = Table['Yields'][names]['Ejected_Mass']
+        YieldTable['Total_Metals'] = Table['Yields'][names]['Total_Metals']
+        YieldTable['Yield'] = Table['Yields'][names]['Yield']
+    H5_Table.close()
