@@ -15,6 +15,7 @@ def readTable(filename):
     Yield_names = []
     Z0 = -1
     T = 0 #table flag
+    Eflag = 0
     yields_file = open(filename,'r')
     yields_lines = yields_file.readlines()
     for lines in yields_lines:
@@ -43,6 +44,7 @@ def readTable(filename):
         if lines[0:10] == 'H Lifetime': 
             LifeTime_List.append(float(lines.split(':')[1]))
         if lines[0:8] == 'H Mfinal':
+            Eflag = 1
             Mfinal = float(lines.split(':')[1])
             Ejected = M-Mfinal
             Ejected_Mass_List.append(Ejected)
@@ -75,11 +77,16 @@ def readTable(filename):
     for i in range(len(Metallicities)):
         Table['Yields'][Yield_names[i]] = {}
         Table['Yields'][Yield_names[i]]['Yield'] = np.array(Yields_data[i]).T
-        Table['Yields'][Yield_names[i]]['Ejected_Mass'] = np.array(Ejected_Mass_Table[i])
+        if Eflag == 1:
+            Table['Yields'][Yield_names[i]]['Ejected_Mass'] = np.array(Ejected_Mass_Table[i])
+        else:
+            Table['Yields'][Yield_names[i]]['Ejected_Mass'] = Table['Yields'][Yield_names[i]]['Yield'].sum(axis = 0)
+        
         Table['Yields'][Yield_names[i]]['LifeTime'] = np.array(LifeTime_Table[i])
     
     
     return Table
+        
 
 
 def findIsotope(speciesList,iso):
